@@ -65,7 +65,8 @@ function initializeCart() {
 cartIcon.addEventListener('click', () => {
     const count = getCartCount();
     console.log('Cart clicked. Items:', count);
-    alert(`You have ${count} items in your cart`);
+    // Navigate to cart page
+    window.location.href = 'cart.html';
 });
 
 // Function to add item to cart
