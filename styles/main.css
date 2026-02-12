@@ -319,6 +319,85 @@ body {
     margin-bottom: 50px;
 }
 
+/* Category Filter */
+.category-filter {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 10px 20px;
+    background-color: #ecf0f1;
+    border: 2px solid #bdc3c7;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+    background-color: #3498db;
+    border-color: #3498db;
+    color: white;
+}
+
+.category-btn.active {
+    background-color: #3498db;
+    border-color: #3498db;
+    color: white;
+}
+
+/* Load More Button */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.load-more-btn {
+    padding: 12px 40px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.load-more-btn:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.load-more-btn:active {
+    transform: translateY(0);
+}
+
+/* Retry Button */
+.retry-btn {
+    padding: 10px 30px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.retry-btn:hover {
+    background-color: #2980b9;
+}
+
 /* Product Grid Layout */
 .product-grid {
     display: grid;
@@ -545,6 +624,15 @@ body {
     .product-card:hover {
         transform: translateY(-5px);
     }
+
+    .category-filter {
+        gap: 10px;
+    }
+
+    .category-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -634,5 +722,20 @@ body {
     .add-to-cart-btn {
         padding: 10px;
         font-size: 13px;
+    }
+
+    .category-filter {
+        gap: 8px;
+        margin-bottom: 30px;
+    }
+
+    .category-btn {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+
+    .load-more-btn {
+        padding: 10px 25px;
+        font-size: 14px;
     }
 }

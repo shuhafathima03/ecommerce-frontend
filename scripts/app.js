@@ -84,45 +84,170 @@ window.addEventListener('scroll', () => {
 
 console.log('E-Commerce Website Loaded');
 
-// Product Grid Dynamic Loading
+// ============================================
+// PRODUCT API MANAGEMENT SYSTEM
+// ============================================
+
 const productGrid = document.getElementById('productGrid');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const errorMessage = document.getElementById('errorMessage');
+const errorText = document.getElementById('errorText');
+const retryBtn = document.getElementById('retryBtn');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const loadMoreContainer = document.querySelector('.load-more-container');
+const categoryButtons = document.querySelectorAll('.category-btn');
 
-// Fetch products from FakeStore API
-async function fetchProducts() {
+// Product Management Variables
+let allProducts = [];
+let filteredProducts = [];
+let currentCategory = 'all';
+let displayedCount = 0;
+const productsPerLoad = 6;
+const CACHE_KEY = 'ShopHub_Products_Cache';
+const CACHE_DURATION = 3600000; // 1 hour in milliseconds
+const MAX_RETRIES = 3;
+let retryCount = 0;
+
+// ============================================
+// CACHING SYSTEM
+// ============================================
+
+function getCachedProducts() {
     try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            // Check if cache is still valid
+            if (Date.now() - timestamp < CACHE_DURATION) {
+                console.log('✓ Using cached products');
+                return data;
+            } else {
+                console.log('✓ Cache expired, fetching fresh data');
+                localStorage.removeItem(CACHE_KEY);
+            }
+        }
+    } catch (error) {
+        console.error('Cache retrieval error:', error);
+    }
+    return null;
+}
+
+function setCachedProducts(products) {
+    try {
+        const cacheData = {
+            data: products,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        console.log('✓ Products cached successfully');
+    } catch (error) {
+        console.error('Cache storage error:', error);
+    }
+}
+
+// ============================================
+// API FETCHING WITH RETRY LOGIC
+// ============================================
+
+async function fetchProducts(attempt = 1) {
+    try {
+        // Check cache first
+        const cachedProducts = getCachedProducts();
+        if (cachedProducts) {
+            allProducts = cachedProducts;
+            loadingSpinner.style.display = 'none';
+            filterByCategory('all');
+            return;
+        }
+
         loadingSpinner.style.display = 'flex';
         errorMessage.style.display = 'none';
         productGrid.innerHTML = '';
 
-        const response = await fetch('https://fakestoreapi.com/products?limit=12');
+        console.log(`Fetching products (Attempt ${attempt}/${MAX_RETRIES})...`);
+
+        const response = await fetch('https://fakestoreapi.com/products');
+        
         if (!response.ok) {
-            throw new Error('Failed to fetch products');
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const products = await response.json();
         
+        if (!Array.isArray(products) || products.length === 0) {
+            throw new Error('No products received from API');
+        }
+
+        allProducts = products;
+        setCachedProducts(products);
+        retryCount = 0;
+        
         loadingSpinner.style.display = 'none';
-        renderProducts(products);
+        filterByCategory('all');
+        
+        console.log(`✓ Successfully loaded ${products.length} products`);
+        
     } catch (error) {
-        console.error('Error fetching products:', error);
-        loadingSpinner.style.display = 'none';
-        errorMessage.style.display = 'block';
-        productGrid.innerHTML = '';
+        console.error(`Error fetching products (Attempt ${attempt}):`, error.message);
+        
+        if (attempt < MAX_RETRIES) {
+            console.log(`⏳ Retrying in 2 seconds...`);
+            setTimeout(() => {
+                fetchProducts(attempt + 1);
+            }, 2000);
+        } else {
+            loadingSpinner.style.display = 'none';
+            showError(error.message);
+        }
     }
 }
 
-// Render products to the grid
-function renderProducts(products) {
-    productGrid.innerHTML = '';
+// ============================================
+// PRODUCT FILTERING
+// ============================================
 
+function filterByCategory(category) {
+    currentCategory = category;
+    displayedCount = 0;
+
+    if (category === 'all') {
+        filteredProducts = allProducts;
+    } else {
+        filteredProducts = allProducts.filter(product => 
+            product.category.toLowerCase() === category.toLowerCase()
+        );
+    }
+
+    // Update active button
+    categoryButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+    });
+
+    // Render products
+    productGrid.innerHTML = '';
+    loadMoreProducts();
+    
+    // Show/hide load more button
+    if (filteredProducts.length > productsPerLoad) {
+        loadMoreContainer.style.display = 'flex';
+    } else {
+        loadMoreContainer.style.display = 'none';
+    }
+}
+
+// ============================================
+// PRODUCT RENDERING
+// ============================================
+
+function renderProducts(products) {
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
+        productCard.setAttribute('data-product-id', product.id);
         
-        const discountedPrice = (product.price * 0.85).toFixed(2); // 15% discount
+        const discountedPrice = (product.price * 0.85).toFixed(2);
         const rating = product.rating ? product.rating.rate : 4.0;
+        const ratingCount = product.rating ? product.rating.count : 0;
 
         productCard.innerHTML = `
             <div class="product-image-container">
@@ -132,9 +257,9 @@ function renderProducts(products) {
                 <h3 class="product-name">${product.title}</h3>
                 <div class="product-price">$${discountedPrice}</div>
                 <div class="product-rating">
-                    <i class="fas fa-star"></i> ${rating}/5
+                    <i class="fas fa-star"></i> ${rating}/5 (${ratingCount} reviews)
                 </div>
-                <button class="add-to-cart-btn" onclick="handleAddToCart(this, '${product.title}', ${discountedPrice})">
+                <button class="add-to-cart-btn" onclick="handleAddToCart(this, '${product.title.replace(/'/g, "\\'")}', ${discountedPrice})">
                     Add to Cart
                 </button>
             </div>
@@ -144,19 +269,81 @@ function renderProducts(products) {
     });
 }
 
-// Handle Add to Cart
+function loadMoreProducts() {
+    const startIndex = displayedCount;
+    const endIndex = startIndex + productsPerLoad;
+    const productsToDisplay = filteredProducts.slice(startIndex, endIndex);
+
+    renderProducts(productsToDisplay);
+    displayedCount = endIndex;
+
+    // Hide load more button if all products are displayed
+    if (displayedCount >= filteredProducts.length) {
+        loadMoreContainer.style.display = 'none';
+    }
+}
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+
+function showError(message) {
+    errorMessage.style.display = 'block';
+    
+    let errorMsg = 'Unable to load products.';
+    
+    if (message.includes('HTTP')) {
+        errorMsg = 'Server error. Please try again later.';
+    } else if (message.includes('No products')) {
+        errorMsg = 'No products available at the moment.';
+    } else if (message.includes('Network')) {
+        errorMsg = 'Network error. Please check your connection.';
+    } else if (message.includes('Failed')) {
+        errorMsg = 'Failed to fetch products. Please try again.';
+    }
+    
+    errorText.textContent = errorMsg;
+    productGrid.innerHTML = '';
+}
+
+// ============================================
+// CART MANAGEMENT
+// ============================================
+
 function handleAddToCart(button, productName, price) {
     addToCart();
     button.textContent = 'Added!';
     button.classList.add('added');
     
-    console.log(`Added to cart: ${productName} - $${price}`);
+    console.log(`✓ Added to cart: ${productName} - $${price}`);
 
     setTimeout(() => {
         button.textContent = 'Add to Cart';
         button.classList.remove('added');
     }, 1500);
 }
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
+// Category filter buttons
+categoryButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        filterByCategory(btn.dataset.category);
+    });
+});
+
+// Load more button
+loadMoreBtn.addEventListener('click', () => {
+    loadMoreProducts();
+});
+
+// Retry button
+retryBtn.addEventListener('click', () => {
+    retryCount = 0;
+    fetchProducts();
+});
 
 // Load products when page loads
 document.addEventListener('DOMContentLoaded', () => {
