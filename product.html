@@ -125,6 +125,33 @@
                         </ul>
                     </div>
 
+                    <!-- Product Variations -->
+                    <div class="variations-section">
+                        <h3>Choose Your Options</h3>
+                        
+                        <!-- Size Variation -->
+                        <div class="variation-group">
+                            <label>Size:</label>
+                            <div class="variation-options" id="sizeOptions">
+                                <button class="variation-btn active" data-variation="size" data-value="S">S</button>
+                                <button class="variation-btn" data-variation="size" data-value="M">M</button>
+                                <button class="variation-btn" data-variation="size" data-value="L">L</button>
+                                <button class="variation-btn" data-variation="size" data-value="XL">XL</button>
+                            </div>
+                        </div>
+
+                        <!-- Color Variation -->
+                        <div class="variation-group">
+                            <label>Color:</label>
+                            <div class="variation-options" id="colorOptions">
+                                <button class="variation-btn active color-btn" data-variation="color" data-value="Black" style="background-color: #000;"></button>
+                                <button class="variation-btn color-btn" data-variation="color" data-value="White" style="background-color: #fff; border: 2px solid #ddd;"></button>
+                                <button class="variation-btn color-btn" data-variation="color" data-value="Blue" style="background-color: #3498db;"></button>
+                                <button class="variation-btn color-btn" data-variation="color" data-value="Red" style="background-color: #e74c3c;"></button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Quantity Selector -->
                     <div class="quantity-section">
                         <label for="quantityInput">Quantity:</label>
@@ -133,6 +160,13 @@
                             <input type="number" id="quantityInput" value="1" min="1" max="10">
                             <button id="increaseBtn">+</button>
                         </div>
+                        <span class="price-per-unit" id="pricePerUnit">$0.00 each</span>
+                    </div>
+
+                    <!-- Total Price -->
+                    <div class="total-price-section">
+                        <span class="total-price-label">Total Price:</span>
+                        <span class="total-price" id="totalPrice">$0.00</span>
                     </div>
 
                     <!-- Action Buttons -->

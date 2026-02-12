@@ -390,6 +390,171 @@ body {
     color: #2c3e50;
 }
 
+/* Product Variations Section */
+.variations-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ecf0f1;
+}
+
+.variations-section h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.variation-group {
+    margin-bottom: 20px;
+}
+
+.variation-group:last-child {
+    margin-bottom: 0;
+}
+
+.variation-group label {
+    display: block;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.variation-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.variation-btn {
+    padding: 8px 16px;
+    border: 2px solid #bdc3c7;
+    background-color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.3s ease;
+    min-width: 50px;
+    text-align: center;
+}
+
+.variation-btn:hover {
+    border-color: #3498db;
+    background-color: #ecf0f1;
+}
+
+.variation-btn.active {
+    background-color: #3498db;
+    border-color: #3498db;
+    color: white;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+}
+
+.color-btn {
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.color-btn.active::after {
+    content: '✓';
+    position: absolute;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Enhanced Image Zoom */
+.main-image-container {
+    position: relative;
+    width: 100%;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.main-image-container:hover .zoom-lens {
+    display: block;
+}
+
+.zoom-lens {
+    display: none;
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 2px solid #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+    border-radius: 50%;
+    pointer-events: none;
+    cursor: crosshair;
+    z-index: 10;
+}
+
+.main-image {
+    width: 100%;
+    height: 500px;
+    object-fit: contain;
+    padding: 20px;
+    transition: transform 0.3s ease;
+}
+
+.main-image-container:hover .main-image {
+    transform: scale(1.1);
+}
+
+/* Quantity Section with Price */
+.quantity-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.quantity-section label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.price-per-unit {
+    font-size: 13px;
+    color: #666;
+    padding: 5px 10px;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+}
+
+/* Total Price Section */
+.total-price-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: white;
+    margin-top: 10px;
+}
+
+.total-price-label {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.total-price {
+    font-size: 28px;
+    font-weight: bold;
+    margin-left: auto;
+}
+
 /* Quantity Section */
 .quantity-section {
     display: flex;
@@ -769,6 +934,34 @@ body {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
+
+    .variations-section {
+        padding: 15px;
+    }
+
+    .variation-group {
+        margin-bottom: 15px;
+    }
+
+    .variation-options {
+        gap: 8px;
+    }
+
+    .variation-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+
+    .total-price-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .total-price {
+        margin-left: 0;
+        margin-top: 10px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -812,5 +1005,50 @@ body {
     .quantity-section {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .variations-section {
+        padding: 15px;
+    }
+
+    .variation-group label {
+        margin-bottom: 8px;
+    }
+
+    .variation-options {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .variation-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+        min-width: 35px;
+    }
+
+    .color-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .price-per-unit {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .total-price-section {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+    }
+
+    .total-price-label {
+        font-size: 14px;
+    }
+
+    .total-price {
+        font-size: 24px;
+        margin-left: 0;
+        margin-top: 8px;
     }
 }

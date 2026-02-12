@@ -22,6 +22,10 @@ const successMessage = document.getElementById('successMessage');
 // Product Data Storage
 let currentProduct = null;
 let allProducts = [];
+let selectedVariations = {
+    size: 'S',
+    color: 'Black'
+};
 const PRODUCTS_CACHE_KEY = 'ShopHub_Products_Cache';
 const CART_KEY = 'ShopHub_Cart';
 
@@ -62,7 +66,12 @@ function addItemToCart(product, quantity = 1) {
     try {
         let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
         
-        const existingItem = cart.find(item => item.id === product.id);
+        const cartItemKey = product.id + '_' + selectedVariations.size + '_' + selectedVariations.color;
+        const existingItem = cart.find(item => 
+            item.id === product.id && 
+            item.selectedVariations.size === selectedVariations.size &&
+            item.selectedVariations.color === selectedVariations.color
+        );
         
         if (existingItem) {
             existingItem.quantity += quantity;
@@ -72,12 +81,18 @@ function addItemToCart(product, quantity = 1) {
                 title: product.title,
                 price: product.price,
                 image: product.image,
-                quantity: quantity
+                quantity: quantity,
+                selectedVariations: {
+                    size: selectedVariations.size,
+                    color: selectedVariations.color
+                }
             });
         }
         
         localStorage.setItem(CART_KEY, JSON.stringify(cart));
         updateCartBadge();
+        
+        console.log(`✓ Cart item: ${product.title} (${selectedVariations.size}, ${selectedVariations.color}) x ${quantity}`);
         
         return true;
     } catch (error) {
@@ -198,6 +213,24 @@ function displayProductDetail() {
     
     // Update page title
     document.title = `${currentProduct.title} - ShopHub`;
+    
+    // Initialize price display
+    updatePrice();
+}
+
+function updatePrice() {
+    if (!currentProduct) return;
+    
+    const quantity = parseInt(quantityInput.value) || 1;
+    const basePrice = currentProduct.price * 0.85; // 15% discount
+    const pricePerUnit = basePrice.toFixed(2);
+    const totalPrice = (basePrice * quantity).toFixed(2);
+    
+    // Update price displays
+    document.getElementById('pricePerUnit').textContent = `$${pricePerUnit} each`;
+    document.getElementById('totalPrice').textContent = `$${totalPrice}`;
+    
+    console.log(`Price updated: $${pricePerUnit} × ${quantity} = $${totalPrice}`);
 }
 
 function loadRelatedProducts() {
@@ -265,6 +298,7 @@ function setupEventListeners() {
         const value = parseInt(quantityInput.value);
         if (value > 1) {
             quantityInput.value = value - 1;
+            updatePrice();
         }
     });
 
@@ -272,6 +306,7 @@ function setupEventListeners() {
         const value = parseInt(quantityInput.value);
         if (value < 10) {
             quantityInput.value = value + 1;
+            updatePrice();
         }
     });
 
@@ -280,6 +315,64 @@ function setupEventListeners() {
         if (isNaN(value) || value < 1) value = 1;
         if (value > 10) value = 10;
         quantityInput.value = value;
+        updatePrice();
+    });
+
+    quantityInput.addEventListener('input', updatePrice);
+
+    // Product Variation Selection
+    const variationBtns = document.querySelectorAll('.variation-btn');
+    variationBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const variationType = this.dataset.variation;
+            const value = this.dataset.value;
+            
+            // Update selected variations
+            selectedVariations[variationType] = value;
+            
+            // Remove active class from all buttons of this type
+            document.querySelectorAll(`.variation-btn[data-variation="${variationType}"]`).forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            console.log(`✓ Selected ${variationType}: ${value}`);
+            
+            // Optional: Update related details
+            if (variationType === 'size') {
+                console.log(`Product selected with Size: ${value}`);
+            } else if (variationType === 'color') {
+                console.log(`Product selected with Color: ${value}`);
+            }
+        });
+    });
+
+    // Hover Zoom Effect
+    const mainImageContainer = document.querySelector('.main-image-container');
+    let zoomLens = document.querySelector('.zoom-lens');
+    
+    if (!zoomLens && mainImageContainer) {
+        // Create zoom lens if it doesn't exist
+        zoomLens = document.createElement('div');
+        zoomLens.className = 'zoom-lens';
+        mainImageContainer.appendChild(zoomLens);
+    }
+    
+    mainImageContainer.addEventListener('mousemove', function(e) {
+        if (!zoomLens.parentElement) return;
+        
+        const rect = mainImageContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left - zoomLens.offsetWidth / 2;
+        const y = e.clientY - rect.top - zoomLens.offsetHeight / 2;
+        
+        // Keep lens within bounds
+        const maxX = mainImageContainer.offsetWidth - zoomLens.offsetWidth;
+        const maxY = mainImageContainer.offsetHeight - zoomLens.offsetHeight;
+        
+        zoomLens.style.left = Math.max(0, Math.min(x, maxX)) + 'px';
+        zoomLens.style.top = Math.max(0, Math.min(y, maxY)) + 'px';
     });
 
     // Add to cart
