@@ -63,6 +63,30 @@
             <h2>Welcome to ShopHub</h2>
             <p>Your one-stop destination for quality products and amazing deals</p>
         </section>
+
+        <!-- Product Grid Section -->
+        <section id="products" class="products-section">
+            <div class="products-container">
+                <h2 class="products-title">Featured Products</h2>
+                <p class="products-subtitle">Discover our amazing collection of products</p>
+                
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <p>Loading products...</p>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="product-grid" id="productGrid">
+                    <!-- Products will be dynamically inserted here -->
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message" id="errorMessage" style="display: none;">
+                    <p>Sorry, unable to load products. Please try again later.</p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script src="scripts/app.js"></script>

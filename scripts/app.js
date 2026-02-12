@@ -83,3 +83,82 @@ window.addEventListener('scroll', () => {
 });
 
 console.log('E-Commerce Website Loaded');
+
+// Product Grid Dynamic Loading
+const productGrid = document.getElementById('productGrid');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const errorMessage = document.getElementById('errorMessage');
+
+// Fetch products from FakeStore API
+async function fetchProducts() {
+    try {
+        loadingSpinner.style.display = 'flex';
+        errorMessage.style.display = 'none';
+        productGrid.innerHTML = '';
+
+        const response = await fetch('https://fakestoreapi.com/products?limit=12');
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
+        }
+
+        const products = await response.json();
+        
+        loadingSpinner.style.display = 'none';
+        renderProducts(products);
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        loadingSpinner.style.display = 'none';
+        errorMessage.style.display = 'block';
+        productGrid.innerHTML = '';
+    }
+}
+
+// Render products to the grid
+function renderProducts(products) {
+    productGrid.innerHTML = '';
+
+    products.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        
+        const discountedPrice = (product.price * 0.85).toFixed(2); // 15% discount
+        const rating = product.rating ? product.rating.rate : 4.0;
+
+        productCard.innerHTML = `
+            <div class="product-image-container">
+                <img src="${product.image}" alt="${product.title}" class="product-image" loading="lazy">
+            </div>
+            <div class="product-info">
+                <h3 class="product-name">${product.title}</h3>
+                <div class="product-price">$${discountedPrice}</div>
+                <div class="product-rating">
+                    <i class="fas fa-star"></i> ${rating}/5
+                </div>
+                <button class="add-to-cart-btn" onclick="handleAddToCart(this, '${product.title}', ${discountedPrice})">
+                    Add to Cart
+                </button>
+            </div>
+        `;
+
+        productGrid.appendChild(productCard);
+    });
+}
+
+// Handle Add to Cart
+function handleAddToCart(button, productName, price) {
+    addToCart();
+    button.textContent = 'Added!';
+    button.classList.add('added');
+    
+    console.log(`Added to cart: ${productName} - $${price}`);
+
+    setTimeout(() => {
+        button.textContent = 'Add to Cart';
+        button.classList.remove('added');
+    }, 1500);
+}
+
+// Load products when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    fetchProducts();
+});
