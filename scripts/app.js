@@ -54,4 +54,32 @@ function addToCart() {
     console.log('Item added to cart. Total:', cartCount);
 }
 
+// CTA Button Functionality
+const ctaButton = document.getElementById('ctaButton');
+
+ctaButton.addEventListener('click', () => {
+    console.log('CTA Button clicked - Shop Now');
+    // Scroll to products section (when we add it)
+    const productsSection = document.getElementById('products');
+    if (productsSection) {
+        productsSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        // For now, show a message
+        alert('👋 Welcome to ShopHub! Explore our amazing products and find exactly what you need. Click on "Products" in the navigation to browse our collection!');
+    }
+});
+
+// Add scroll animation to welcome section
+window.addEventListener('scroll', () => {
+    const welcomeSection = document.querySelector('.welcome-section');
+    const heroSection = document.querySelector('.hero-section');
+    
+    if (welcomeSection) {
+        const welcomeRect = welcomeSection.getBoundingClientRect();
+        if (welcomeRect.top < window.innerHeight && welcomeRect.bottom > 0) {
+            welcomeSection.style.opacity = Math.min(1, 1 - (welcomeRect.top - window.innerHeight) / window.innerHeight);
+        }
+    }
+});
+
 console.log('E-Commerce Website Loaded');
