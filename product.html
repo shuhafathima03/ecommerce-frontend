@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - ShopHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/product.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <!-- Logo -->
+            <div class="logo">
+                <i class="fas fa-shopping-bag"></i>
+                <span>ShopHub</span>
+            </div>
+
+            <!-- Hamburger Menu -->
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="index.html#products" class="nav-link">Products</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+
+            <!-- Right Section: Search Bar & Cart -->
+            <div class="header-right">
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <input type="text" placeholder="Search products..." class="search-input">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+
+                <!-- Cart Icon -->
+                <div class="cart-icon" id="cartIcon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Breadcrumb Navigation -->
+        <div class="breadcrumb">
+            <a href="index.html">Home</a>
+            <span>/</span>
+            <a href="index.html#products">Products</a>
+            <span>/</span>
+            <span id="breadcrumbProduct">Product</span>
+        </div>
+
+        <!-- Product Detail Section -->
+        <section class="product-detail-section">
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState">
+                <div class="spinner"></div>
+                <p>Loading product details...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-state" id="errorState" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <p id="errorMessage">Sorry, product not found.</p>
+                <a href="index.html" class="back-btn">Back to Products</a>
+            </div>
+
+            <!-- Product Detail Container -->
+            <div class="product-detail-container" id="productDetailContainer" style="display: none;">
+                <!-- Product Image Section -->
+                <div class="product-image-section">
+                    <div class="main-image-container">
+                        <img id="mainImage" src="" alt="Product" class="main-image">
+                        <button class="zoom-btn" id="zoomBtn"><i class="fas fa-search-plus"></i></button>
+                    </div>
+                </div>
+
+                <!-- Product Info Section -->
+                <div class="product-info-section">
+                    <!-- Category Badge -->
+                    <span class="category-badge" id="categoryBadge">Category</span>
+
+                    <!-- Product Title -->
+                    <h1 id="productTitle">Product Title</h1>
+
+                    <!-- Rating -->
+                    <div class="rating-section">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <span id="ratingValue">4.0</span>/5
+                        </div>
+                        <span id="reviewCount">(100 reviews)</span>
+                    </div>
+
+                    <!-- Price Section -->
+                    <div class="price-section">
+                        <div class="price">
+                            <span class="original-price" id="originalPrice">$99.99</span>
+                            <span class="discount-price" id="discountPrice">$84.99</span>
+                            <span class="discount-tag">15% OFF</span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="description-section">
+                        <h3>Description</h3>
+                        <p id="productDescription">Product description goes here...</p>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="product-details-list">
+                        <h3>Details</h3>
+                        <ul id="detailsList">
+                            <li><strong>Category:</strong> <span id="detailCategory">-</span></li>
+                            <li><strong>Rating:</strong> <span id="detailRating">-</span></li>
+                            <li><strong>Reviews:</strong> <span id="detailReviews">-</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Quantity Selector -->
+                    <div class="quantity-section">
+                        <label for="quantityInput">Quantity:</label>
+                        <div class="quantity-controls">
+                            <button id="decreaseBtn">-</button>
+                            <input type="number" id="quantityInput" value="1" min="1" max="10">
+                            <button id="increaseBtn">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="add-to-cart-btn" id="addToCartBtn">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button class="wishlist-btn" id="wishlistBtn">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div class="success-message" id="successMessage" style="display: none;">
+                        <i class="fas fa-check-circle"></i> Added to cart successfully!
+                    </div>
+
+                    <!-- Share Section -->
+                    <div class="share-section">
+                        <span>Share:</span>
+                        <button class="share-btn"><i class="fab fa-facebook"></i></button>
+                        <button class="share-btn"><i class="fab fa-twitter"></i></button>
+                        <button class="share-btn"><i class="fab fa-pinterest"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Products Section -->
+        <section class="related-products-section">
+            <h2>You Might Also Like</h2>
+            <div class="related-products-grid" id="relatedProductsGrid">
+                <!-- Related products will be inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Image Zoom Modal -->
+    <div class="image-zoom-modal" id="imageZoomModal" style="display: none;">
+        <button class="close-zoom" id="closeZoom">&times;</button>
+        <img id="zoomImage" src="" alt="Product Zoom" class="zoom-image">
+    </div>
+
+    <script src="scripts/product.js"></script>
+</body>
+</html>

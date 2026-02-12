@@ -40,18 +40,40 @@ searchInput.addEventListener('keypress', (e) => {
 });
 
 // Cart functionality
-let cartCount = 0;
+const CART_KEY = 'ShopHub_Cart';
+
+function getCartCount() {
+    try {
+        const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+        return cart.reduce((total, item) => total + item.quantity, 0);
+    } catch (error) {
+        console.error('Error getting cart count:', error);
+        return 0;
+    }
+}
+
+function updateCartBadge() {
+    const count = getCartCount();
+    cartBadge.textContent = count;
+}
+
+// Initialize cart on page load
+function initializeCart() {
+    updateCartBadge();
+}
 
 cartIcon.addEventListener('click', () => {
-    console.log('Cart clicked. Items:', cartCount);
-    alert(`You have ${cartCount} items in your cart`);
+    const count = getCartCount();
+    console.log('Cart clicked. Items:', count);
+    alert(`You have ${count} items in your cart`);
 });
 
 // Function to add item to cart
 function addToCart() {
-    cartCount++;
-    cartBadge.textContent = cartCount;
-    console.log('Item added to cart. Total:', cartCount);
+    // This is called from product cards - increment cart
+    const count = getCartCount();
+    updateCartBadge();
+    console.log('Item added to cart. Total:', count + 1);
 }
 
 // CTA Button Functionality
@@ -244,6 +266,7 @@ function renderProducts(products) {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.setAttribute('data-product-id', product.id);
+        productCard.style.cursor = 'pointer';
         
         const discountedPrice = (product.price * 0.85).toFixed(2);
         const rating = product.rating ? product.rating.rate : 4.0;
@@ -259,11 +282,16 @@ function renderProducts(products) {
                 <div class="product-rating">
                     <i class="fas fa-star"></i> ${rating}/5 (${ratingCount} reviews)
                 </div>
-                <button class="add-to-cart-btn" onclick="handleAddToCart(this, '${product.title.replace(/'/g, "\\'")}', ${discountedPrice})">
+                <button class="add-to-cart-btn" onclick="event.stopPropagation(); handleAddToCart(this, '${product.title.replace(/'/g, "\\'")}', ${discountedPrice})">
                     Add to Cart
                 </button>
             </div>
         `;
+
+        // Add click handler to navigate to product detail page
+        productCard.addEventListener('click', () => {
+            window.location.href = `product.html?id=${product.id}`;
+        });
 
         productGrid.appendChild(productCard);
     });
@@ -347,5 +375,6 @@ retryBtn.addEventListener('click', () => {
 
 // Load products when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    initializeCart();
     fetchProducts();
 });
