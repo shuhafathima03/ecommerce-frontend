@@ -1,9 +1,9 @@
 // ============================================
-// AUTHENTICATION PAGE - JAVASCRIPT
+// FIREBASE AUTHENTICATION
 // ============================================
 
-const AUTH_KEY = 'ShopHub_Auth';
-const USERS_KEY = 'ShopHub_Users';
+// Firebase Authentication State
+let currentUser = null;
 
 // DOM Elements
 const loginForm = document.getElementById('loginForm');
@@ -21,9 +21,54 @@ const navMenu = document.getElementById('navMenu');
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Auth page loaded');
+    initializeFirebase();
     setupEventListeners();
-    initializeUsers();
+    checkAuthState();
 });
+
+// Initialize Firebase
+function initializeFirebase() {
+    // Firebase is loaded from CDN in HTML
+    // Check if Firebase is available
+    if (typeof firebase === 'undefined') {
+        console.error('Firebase SDK not loaded. Make sure to include Firebase CDN in HTML.');
+        showError('Firebase authentication is not available. Please refresh the page.');
+        return;
+    }
+
+    // Initialize Firebase with config from firebase-config.js
+    if (typeof firebaseConfig === 'undefined') {
+        console.error('Firebase config not found. Add your Firebase config to scripts/firebase-config.js');
+        showError('Firebase configuration is missing. Please contact support.');
+        return;
+    }
+
+    try {
+        firebase.initializeApp(firebaseConfig);
+        console.log('✓ Firebase initialized successfully');
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        // Firebase might already be initialized
+    }
+}
+
+// Check Authentication State
+function checkAuthState() {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            console.log('✓ User authenticated:', user.email);
+            // Redirect to home page if user is already logged in
+            // Comment this out if you want to allow viewing auth page while logged in
+            // setTimeout(() => {
+            //     window.location.href = 'index.html';
+            // }, 1000);
+        } else {
+            currentUser = null;
+            console.log('No user authenticated');
+        }
+    });
+}
 
 function setupEventListeners() {
     loginFormElement.addEventListener('submit', handleLogin);
@@ -46,48 +91,6 @@ function setupEventListeners() {
 }
 
 // ============================================
-// USER MANAGEMENT
-// ============================================
-
-function initializeUsers() {
-    try {
-        const users = localStorage.getItem(USERS_KEY);
-        if (!users) {
-            // Initialize with demo user
-            const demoUsers = [
-                {
-                    id: 1,
-                    name: 'John Doe',
-                    email: 'john@example.com',
-                    password: 'Password123' // In real app, this would be hashed
-                }
-            ];
-            localStorage.setItem(USERS_KEY, JSON.stringify(demoUsers));
-            console.log('Demo users initialized');
-        }
-    } catch (error) {
-        console.error('Error initializing users:', error);
-    }
-}
-
-function getUsers() {
-    try {
-        return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-    } catch (error) {
-        console.error('Error getting users:', error);
-        return [];
-    }
-}
-
-function saveUsers(users) {
-    try {
-        localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    } catch (error) {
-        console.error('Error saving users:', error);
-    }
-}
-
-// ============================================
 // FORM SWITCHING
 // ============================================
 
@@ -97,13 +100,17 @@ function switchForm(formType) {
         signupForm.classList.remove('active');
         loginTab.classList.add('active');
         signupTab.classList.remove('active');
+        clearFormErrors();
     } else {
         signupForm.classList.add('active');
         loginForm.classList.remove('active');
         signupTab.classList.add('active');
         loginTab.classList.remove('active');
+        clearFormErrors();
     }
 }
+
+
 
 // ============================================
 // PASSWORD VISIBILITY TOGGLE
@@ -297,6 +304,10 @@ function validatePasswordMatch() {
 // FORM SUBMISSION
 // ============================================
 
+// ============================================
+// FIREBASE LOGIN
+// ============================================
+
 function handleLogin(event) {
     event.preventDefault();
 
@@ -315,45 +326,67 @@ function handleLogin(event) {
         return;
     }
 
-    // Check credentials
-    const users = getUsers();
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-    if (!user || user.password !== password) {
-        document.getElementById('loginPasswordError').textContent = 'Invalid email or password';
-        document.getElementById('loginPassword').classList.add('error');
-        return;
-    }
-
-    // Successful login
-    const loginSuccess = document.getElementById('loginSuccess');
+    // Disable button and show loading state
     const loginBtn = loginFormElement.querySelector('button[type="submit"]');
     const originalBtnText = loginBtn.innerHTML;
-
-    // Show success message
-    loginSuccess.classList.add('show');
     loginBtn.disabled = true;
-    loginBtn.textContent = 'Signing in...';
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
 
-    // Save auth data
-    const authData = {
-        userId: user.id,
-        email: user.email,
-        name: user.name,
-        loginTime: new Date().toISOString(),
-        rememberMe: rememberMe
-    };
+    // Firebase Login
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            console.log('✓ Login successful:', user.email);
 
-    localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
+            // Show success message
+            const loginSuccess = document.getElementById('loginSuccess');
+            loginSuccess.classList.add('show');
 
-    // Simulate redirect
-    console.log('✓ Login successful:', authData);
-    
-    setTimeout(() => {
-        alert(`Welcome back, ${user.name}!`);
-        window.location.href = 'index.html';
-    }, 1500);
+            // Save additional user data if needed
+            saveUserPreferences(user);
+
+            // Redirect to home page
+            setTimeout(() => {
+                alert(`Welcome back, ${user.email}!`);
+                window.location.href = 'index.html';
+            }, 1500);
+        })
+        .catch((error) => {
+            console.error('Login error:', error);
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = originalBtnText;
+            
+            // Handle Firebase errors
+            let errorMsg = 'Login failed. Please try again.';
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    errorMsg = 'No account found with this email. Please sign up first.';
+                    break;
+                case 'auth/wrong-password':
+                    errorMsg = 'Incorrect password. Please try again.';
+                    break;
+                case 'auth/invalid-email':
+                    errorMsg = 'Invalid email format.';
+                    break;
+                case 'auth/user-disabled':
+                    errorMsg = 'This account has been disabled. Contact support.';
+                    break;
+                case 'auth/too-many-login-attempts':
+                    errorMsg = 'Too many login attempts. Please try again later.';
+                    break;
+                default:
+                    errorMsg = error.message;
+            }
+            
+            document.getElementById('loginPasswordError').textContent = errorMsg;
+            document.getElementById('loginPassword').classList.add('error');
+        });
 }
+
+// ============================================
+// FIREBASE SIGNUP
+// ============================================
 
 function handleSignup(event) {
     event.preventDefault();
@@ -372,9 +405,6 @@ function handleSignup(event) {
         document.getElementById('signupNameError').textContent = 'Please enter your full name (at least 2 characters)';
         document.getElementById('signupName').classList.add('error');
         isValid = false;
-    } else {
-        document.getElementById('signupNameError').textContent = '';
-        document.getElementById('signupName').classList.remove('error');
     }
 
     // Email validation
@@ -382,17 +412,6 @@ function handleSignup(event) {
         document.getElementById('signupEmailError').textContent = 'Invalid email format';
         document.getElementById('signupEmail').classList.add('error');
         isValid = false;
-    } else {
-        const users = getUsers();
-        const emailExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
-        if (emailExists) {
-            document.getElementById('signupEmailError').textContent = 'This email is already registered';
-            document.getElementById('signupEmail').classList.add('error');
-            isValid = false;
-        } else {
-            document.getElementById('signupEmailError').textContent = '';
-            document.getElementById('signupEmail').classList.remove('error');
-        }
     }
 
     // Password validation
@@ -405,62 +424,146 @@ function handleSignup(event) {
         document.getElementById('signupConfirmError').textContent = 'Passwords do not match';
         document.getElementById('signupConfirmPassword').classList.add('error');
         isValid = false;
-    } else {
-        document.getElementById('signupConfirmError').textContent = '';
-        document.getElementById('signupConfirmPassword').classList.remove('error');
     }
 
     // Terms validation
     if (!termsCheckbox) {
         document.getElementById('termsError').textContent = 'You must agree to the Terms & Conditions';
         isValid = false;
-    } else {
-        document.getElementById('termsError').textContent = '';
     }
 
     if (!isValid) {
-        console.log('❌ Form validation failed');
         return;
     }
 
-    // Create new user
-    const users = getUsers();
-    const newUser = {
-        id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+    // Disable button and show loading state
+    const signupBtn = signupFormElement.querySelector('button[type="submit"]');
+    const originalBtnText = signupBtn.innerHTML;
+    signupBtn.disabled = true;
+    signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+
+    // Firebase Signup
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            console.log('✓ Signup successful:', user.uid);
+
+            // Save user profile information
+            return user.updateProfile({
+                displayName: name
+            }).then(() => {
+                // Save additional user data to localStorage as backup
+                return saveUserData(user, name, email);
+            });
+        })
+        .then(() => {
+            // Show success message
+            const signupSuccess = document.getElementById('signupSuccess');
+            signupSuccess.classList.add('show');
+
+            console.log('✓ User profile updated');
+
+            // Redirect to home page
+            setTimeout(() => {
+                alert('Account created successfully! Welcome to ShopHub!');
+                window.location.href = 'index.html';
+            }, 1500);
+        })
+        .catch((error) => {
+            console.error('Signup error:', error);
+            signupBtn.disabled = false;
+            signupBtn.innerHTML = originalBtnText;
+
+            // Handle Firebase errors
+            let errorMsg = 'Signup failed. Please try again.';
+            let errorField = 'signupPasswordError';
+
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    errorMsg = 'This email is already registered. Please sign in or use a different email.';
+                    errorField = 'signupEmailError';
+                    document.getElementById('signupEmail').classList.add('error');
+                    break;
+                case 'auth/weak-password':
+                    errorMsg = 'Password is too weak. Please use a stronger password.';
+                    break;
+                case 'auth/invalid-email':
+                    errorMsg = 'Invalid email format.';
+                    errorField = 'signupEmailError';
+                    document.getElementById('signupEmail').classList.add('error');
+                    break;
+                case 'auth/operation-not-allowed':
+                    errorMsg = 'Email/password signup is not enabled. Contact support.';
+                    break;
+                default:
+                    errorMsg = error.message;
+            }
+
+            document.getElementById(errorField).textContent = errorMsg;
+        });
+}
+
+// ============================================
+// USER DATA MANAGEMENT
+// ============================================
+
+function saveUserData(user, name, email) {
+    // This would typically save to Firestore or Realtime Database
+    // For now, we'll save to localStorage as backup
+    const userData = {
+        uid: user.uid,
         name: name,
         email: email,
-        password: password,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString()
     };
 
-    users.push(newUser);
-    saveUsers(users);
+    try {
+        localStorage.setItem('ShopHub_UserProfile', JSON.stringify(userData));
+        return Promise.resolve();
+    } catch (error) {
+        console.error('Error saving user data:', error);
+        return Promise.reject(error);
+    }
+}
 
-    // Successful signup
-    const signupSuccess = document.getElementById('signupSuccess');
-    const signupBtn = signupFormElement.querySelector('button[type="submit"]');
-
-    signupSuccess.classList.add('show');
-    signupBtn.disabled = true;
-    signupBtn.textContent = 'Account created...';
-
-    // Save auth data
-    const authData = {
-        userId: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        loginTime: new Date().toISOString(),
-        rememberMe: false
+function saveUserPreferences(user) {
+    // Save login preferences
+    const preferences = {
+        uid: user.uid,
+        lastLogin: new Date().toISOString(),
+        email: user.email
     };
 
-    localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
+    try {
+        localStorage.setItem('ShopHub_UserPreferences', JSON.stringify(preferences));
+    } catch (error) {
+        console.error('Error saving preferences:', error);
+    }
+}
 
-    console.log('✓ Account created successfully:', newUser);
+// ============================================
+// UTILITIES
+// ============================================
 
-    setTimeout(() => {
-        alert(`Welcome to ShopHub, ${newUser.name}! Your account has been created successfully.`);
-        window.location.href = 'index.html';
-    }, 1500);
+function clearFormErrors() {
+    // Clear all error messages and input classes
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.textContent = '';
+    });
+    document.querySelectorAll('input').forEach(el => {
+        el.classList.remove('error', 'success');
+    });
+}
+
+function showError(message) {
+    const errorElement = document.getElementById('errorState');
+    if (errorElement) {
+        document.getElementById('errorMessage').textContent = message;
+        errorElement.style.display = 'flex';
+    } else {
+        console.error(message);
+    }
 }
 
 // ============================================
@@ -468,8 +571,8 @@ function handleSignup(event) {
 // ============================================
 
 function handleSocialLogin(provider) {
-    alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not yet implemented. Please use email/password authentication.`);
+    alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login is not yet implemented with Firebase. Please use email/password authentication.`);
     console.log(`Social login attempt: ${provider}`);
 }
 
-console.log('Auth page script loaded successfully');
+console.log('Firebase authentication script loaded successfully');
