@@ -110,12 +110,18 @@ function renderCart() {
     if (cart.length === 0) {
         cartItemsContainer.style.display = 'none';
         emptyCart.classList.add('show');
+        checkoutBtn.disabled = true;
+        checkoutBtn.style.opacity = '0.5';
+        checkoutBtn.style.cursor = 'not-allowed';
         updateOrderSummary();
         return;
     }
 
     cartItemsContainer.style.display = 'flex';
     emptyCart.classList.remove('show');
+    checkoutBtn.disabled = false;
+    checkoutBtn.style.opacity = '1';
+    checkoutBtn.style.cursor = 'pointer';
     cartItemsContainer.innerHTML = '';
 
     cart.forEach((item, index) => {

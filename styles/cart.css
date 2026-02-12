@@ -385,6 +385,16 @@
     box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
 }
 
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary:disabled:hover {
+    box-shadow: none;
+}
+
 .btn-continue {
     width: 100%;
     padding: 12px;
