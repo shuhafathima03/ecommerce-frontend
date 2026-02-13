@@ -4,9 +4,22 @@
   "description": "A modern e-commerce frontend website",
   "main": "scripts/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "minify:js": "npx terser scripts/app.js -c -m -o scripts/app.min.js && npx terser scripts/auth.js -c -m -o scripts/auth.min.js && npx terser scripts/cart.js -c -m -o scripts/cart.min.js && npx terser scripts/product.js -c -m -o scripts/product.min.js && npx terser scripts/image-optimizer.js -c -m -o scripts/image-optimizer.min.js",
+    "minify:css": "node -e \"const CleanCSS = require('clean-css'); const fs = require('fs'); const files = ['styles/main.css', 'styles/product.css', 'styles/cart.css', 'styles/auth.css']; let combined = ''; files.forEach(f => { combined += fs.readFileSync(f, 'utf8') + '\\n'; }); const output = new CleanCSS().minify(combined).styles; fs.writeFileSync('styles/all.min.css', output);\"",
+    "minify:all": "npm run minify:js && npm run minify:css",
+    "build": "npm run minify:all",
+    "dev": "echo \"Development mode - no minification\""
   },
-  "keywords": ["ecommerce", "frontend", "online-store"],
+  "keywords": [
+    "ecommerce",
+    "frontend",
+    "online-store"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "clean-css": "^5.3.3",
+    "terser": "^5.46.0"
+  }
 }
