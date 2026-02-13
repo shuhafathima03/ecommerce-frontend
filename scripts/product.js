@@ -251,7 +251,7 @@ function loadRelatedProducts() {
         const discountedPrice = (product.price * 0.85).toFixed(2);
         
         productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.title}" class="related-product-image">
+            <img src="${product.image}" alt="${product.title}" class="related-product-image" loading="lazy" decoding="async">
             <div class="related-product-info">
                 <h4>${product.title}</h4>
                 <div class="related-product-price">$${discountedPrice}</div>

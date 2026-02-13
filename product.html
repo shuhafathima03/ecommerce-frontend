@@ -88,7 +88,7 @@
                 <!-- Product Image Section -->
                 <div class="product-image-section">
                     <div class="main-image-container">
-                        <img id="mainImage" src="" alt="Product" class="main-image">
+                        <img id="mainImage" src="" alt="Product" class="main-image" decoding="async">
                         <button class="zoom-btn" id="zoomBtn"><i class="fas fa-search-plus"></i></button>
                     </div>
                 </div>
@@ -230,6 +230,32 @@
     <!-- Global User Auth State Manager -->
     <script src="scripts/user-auth-state.js"></script>
 
+    <!-- Image & Asset Optimizer -->
+    <script src="scripts/image-optimizer.js"></script>
+
+    <!-- Product Script -->
     <script src="scripts/product.js"></script>
+
+    <!-- Initialize Lazy Loading -->
+    <script>
+        // Initialize lazy loading when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof ImageOptimizer !== 'undefined') {
+                    const optimizer = new ImageOptimizer();
+                    optimizer.setupLazyLoading();
+                    optimizer.preloadCriticalAssets();
+                    optimizer.monitorPerformance();
+                }
+            });
+        } else {
+            if (typeof ImageOptimizer !== 'undefined') {
+                const optimizer = new ImageOptimizer();
+                optimizer.setupLazyLoading();
+                optimizer.preloadCriticalAssets();
+                optimizer.monitorPerformance();
+            }
+        }
+    </script>
 </body>
 </html>

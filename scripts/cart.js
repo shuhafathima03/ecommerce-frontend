@@ -147,7 +147,7 @@ function createCartItemElement(item, index) {
     const variationsHTML = [sizeText, colorText].filter(Boolean).join(' • ');
 
     itemDiv.innerHTML = `
-        <img src="${item.image}" alt="${item.title}" class="cart-item-image">
+        <img src="${item.image}" alt="${item.title}" class="cart-item-image" loading="lazy" decoding="async">
         
         <div class="cart-item-details">
             <h3 class="cart-item-title">${item.title}</h3>

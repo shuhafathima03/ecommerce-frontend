@@ -324,7 +324,35 @@
     <!-- Firebase Configuration -->
     <script src="scripts/firebase-config.js"></script>
 
+    <!-- Global User Auth State Manager -->
+    <script src="scripts/user-auth-state.js"></script>
+
+    <!-- Image & Asset Optimizer -->
+    <script src="scripts/image-optimizer.js"></script>
+
     <!-- Authentication Script -->
     <script src="scripts/auth.js"></script>
+
+    <!-- Initialize Lazy Loading -->
+    <script>
+        // Initialize lazy loading when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof ImageOptimizer !== 'undefined') {
+                    const optimizer = new ImageOptimizer();
+                    optimizer.setupLazyLoading();
+                    optimizer.preloadCriticalAssets();
+                    optimizer.monitorPerformance();
+                }
+            });
+        } else {
+            if (typeof ImageOptimizer !== 'undefined') {
+                const optimizer = new ImageOptimizer();
+                optimizer.setupLazyLoading();
+                optimizer.preloadCriticalAssets();
+                optimizer.monitorPerformance();
+            }
+        }
+    </script>
 </body>
 </html>
