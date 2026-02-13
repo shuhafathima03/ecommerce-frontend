@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Commerce Frontend</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Preload Font Awesome for faster loading (non-blocking) -->
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </noscript>
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
@@ -114,21 +119,21 @@
         </section>
     </main>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Critical - No Defer) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
 
-    <!-- Firebase Configuration -->
+    <!-- Firebase Configuration (Critical - No Defer) -->
     <script src="scripts/firebase-config.js"></script>
 
-    <!-- Global User Auth State Manager -->
+    <!-- Global User Auth State Manager (Critical - No Defer) -->
     <script src="scripts/user-auth-state.js"></script>
 
-    <!-- Image & Asset Optimizer -->
-    <script src="scripts/image-optimizer.js"></script>
+    <!-- Image & Asset Optimizer (Deferred) -->
+    <script defer src="scripts/image-optimizer.js"></script>
 
-    <!-- Application Script -->
-    <script src="scripts/app.js"></script>
+    <!-- Application Script (Deferred) -->
+    <script defer src="scripts/app.js"></script>
 
     <!-- Initialize Lazy Loading -->
     <script>
