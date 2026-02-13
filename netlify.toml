@@ -1,0 +1,48 @@
+# Netlify Configuration
+# Site settings for optimal deployment
+
+[build]
+  command = ""
+  publish = "."
+
+[build.environment]
+  # Set Node version if needed
+  NODE_VERSION = "18"
+
+# Redirect rules
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Cache rules for static assets
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, s-maxage=31536000"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, s-maxage=31536000"
+
+[[headers]]
+  for = "/*.woff*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=31536000"
+
+[[headers]]
+  for = "/assets/images/*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=31536000"
+
+# HTML files - no cache (always check for latest)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
